@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Guess That Pokémon</title>
+<style>
+:root{--bg:#fff;--fg:#1a1a1a;--card:#f1f1f1;--g:#3a9d4f;--y:#d1a31a;--x:#8a8a8a}
+@media(prefers-color-scheme:dark){:root{--bg:#16181d;--fg:#eee;--card:#262a33}}
+body{margin:0;padding:12px;background:var(--bg);color:var(--fg);font-family:system-ui,sans-serif;max-width:720px;margin:auto}
+h1{font-size:1.3rem;margin:.3rem 0}
+.bar{display:flex;gap:6px}
+input{flex:1;padding:10px;font-size:1rem;border-radius:8px;border:1px solid var(--x);background:var(--card);color:var(--fg)}
+button{padding:10px 14px;border:0;border-radius:8px;background:var(--g);color:#fff;font-size:1rem}
+button.alt{background:var(--x)}
+.wrap{overflow-x:auto;margin-top:12px}
+.row{display:grid;grid-template-columns:56px repeat(8,64px);gap:4px;margin-bottom:4px;min-width:600px}
+.c{background:var(--x);color:#fff;border-radius:6px;padding:6px 2px;font-size:.72rem;text-align:center;display:flex;align-items:center;justify-content:center;min-height:48px;word-break:break-word}
+.c.g{background:var(--g)}.c.y{background:var(--y)}
+.hd .c{background:var(--card);color:var(--fg);min-height:28px;font-weight:600}
+.row img{width:56px;height:56px;image-rendering:pixelated}
+#msg{margin:10px 0;font-weight:600}#stats{font-size:.85rem;opacity:.8;margin-bottom:6px}#reveal img{image-rendering:pixelated}
+</style></head><body>
+<h1>Guess That Pokémon</h1>
+<div class="bar"><input id="in" list="dl" placeholder="Type a Pokémon…" autocomplete="off">
+<button id="go">Guess</button></div>
+<datalist id="dl"></datalist>
+<div id="msg"></div><div id="reveal"></div><div id="stats"></div>
+<div class="wrap"><div class="row hd"><div class="c"></div><div class="c">Name</div><div class="c">Type 1</div><div class="c">Type 2</div><div class="c">Gen</div><div class="c">Stage</div><div class="c">Height</div><div class="c">Weight</div><div class="c">BST</div></div><div id="board"></div></div>
+<p><button id="share" hidden>Share result</button> <button class="alt" id="rand">Practice round</button> <button class="alt" id="day">Today's puzzle</button></p>
+<label><input type="checkbox" id="spr" style="flex:none"> Show sprites on guesses</label>
+<script>
+// Sample data. Replace by running build_data.py, which writes pokemon.json (full dex).
+let DEX=[
+{id:1,name:"Bulbasaur",t1:"grass",t2:"poison",gen:1,stage:1,h:0.7,w:6.9,bst:318},
+{id:3,name:"Venusaur",t1:"grass",t2:"poison",gen:1,stage:3,h:2.0,w:100,bst:525},
+{id:4,name:"Charmander",t1:"fire",t2:"",gen:1,stage:1,h:0.6,w:8.5,bst:309},
+{id:6,name:"Charizard",t1:"fire",t2:"flying",gen:1,stage:3,h:1.7,w:90.5,bst:534},
+{id:7,name:"Squirtle",t1:"water",t2:"",gen:1,stage:1,h:0.5,w:9.0,bst:314},
+{id:9,name:"Blastoise",t1:"water",t2:"",gen:1,stage:3,h:1.6,w:85.5,bst:530},
+{id:25,name:"Pikachu",t1:"electric",t2:"",gen:1,stage:2,h:0.4,w:6.0,bst:320},
+{id:39,name:"Jigglypuff",t1:"normal",t2:"fairy",gen:1,stage:2,h:0.5,w:5.5,bst:270},
+{id:94,name:"Gengar",t1:"ghost",t2:"poison",gen:1,stage:3,h:1.5,w:40.5,bst:500},
+{id:131,name:"Lapras",t1:"water",t2:"ice",gen:1,stage:1,h:2.5,w:220,bst:535},
+{id:133,name:"Eevee",t1:"normal",t2:"",gen:1,stage:1,h:0.3,w:6.5,bst:325},
+{id:143,name:"Snorlax",t1:"normal",t2:"",gen:1,stage:2,h:2.1,w:460,bst:540},
+{id:149,name:"Dragonite",t1:"dragon",t2:"flying",gen:1,stage:3,h:2.2,w:210,bst:600},
+{id:150,name:"Mewtwo",t1:"psychic",t2:"",gen:1,stage:1,h:2.0,w:122,bst:680},
+{id:151,name:"Mew",t1:"psychic",t2:"",gen:1,stage:1,h:0.4,w:4.0,bst:600},
+{id:152,name:"Chikorita",t1:"grass",t2:"",gen:2,stage:1,h:0.9,w:6.4,bst:318},
+{id:155,name:"Cyndaquil",t1:"fire",t2:"",gen:2,stage:1,h:0.5,w:7.9,bst:309},
+{id:158,name:"Totodile",t1:"water",t2:"",gen:2,stage:1,h:0.6,w:9.5,bst:314},
+{id:248,name:"Tyranitar",t1:"rock",t2:"dark",gen:2,stage:3,h:2.0,w:202,bst:600},
+{id:282,name:"Gardevoir",t1:"psychic",t2:"fairy",gen:3,stage:3,h:1.6,w:48.4,bst:518},
+{id:445,name:"Garchomp",t1:"dragon",t2:"ground",gen:4,stage:3,h:1.9,w:95,bst:600},
+{id:448,name:"Lucario",t1:"fighting",t2:"steel",gen:4,stage:2,h:1.2,w:54,bst:525},
+{id:658,name:"Greninja",t1:"water",t2:"dark",gen:6,stage:3,h:1.5,w:40,bst:530},
+{id:700,name:"Sylveon",t1:"fairy",t2:"",gen:6,stage:2,h:1.0,w:23.5,bst:525},
+{id:778,name:"Mimikyu",t1:"ghost",t2:"fairy",gen:7,stage:1,h:0.2,w:0.7,bst:476},
+{id:884,name:"Duraludon",t1:"steel",t2:"dragon",gen:8,stage:1,h:1.8,w:40,bst:535},
+{id:906,name:"Sprigatito",t1:"grass",t2:"",gen:9,stage:1,h:0.4,w:4.1,bst:310}];
+const MAX=8,$=s=>document.getElementById(s);
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},
+ set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const utc=(off=0)=>new Date(Date.now()+off*864e5).toISOString().slice(0,10);
+let answer,guesses,over,mode;
+function daily(){ // same Pokémon for everyone, resets at 00:00 UTC
+  let d=Math.floor(Date.now()/864e5),s=(d*2654435761)>>>0;s^=s>>>15;s=Math.imul(s,2246822519)>>>0;
+  return DEX[s%DEX.length]}
+// Returns [class,text] per column: name, type1, type2, gen, stage, height, weight, bst
+function evalG(p){
+  const ty=(v,k)=>!v?[answer[k]?"":"g","—"]:answer[k]===v?["g",v]:(answer.t1===v||answer.t2===v)?["y",v]:["",v];
+  const nm=k=>p[k]===answer[k]?["g",""+p[k]]:["",(answer[k]>p[k]?"↑ ":"↓ ")+p[k]];
+  return [[p===answer?"g":"",p.name],ty(p.t1,"t1"),ty(p.t2,"t2"),nm("gen"),nm("stage"),nm("h"),nm("w"),nm("bst")]}
+function redraw(){
+  const spr=$("spr").checked;
+  $("board").innerHTML=guesses.slice().reverse().map(p=>{
+    const img=spr?`<img src="sprites/${p.id}.png" onerror="this.style.visibility='hidden'" alt="">`:"<div></div>";
+    return `<div class="row">${img}${evalG(p).map(([c,t])=>`<div class="c ${c}">${t}</div>`).join("")}</div>`}).join("")}
+function showStats(){
+  const s=store.get("pk_stats",null);
+  $("stats").textContent=s?`Played ${s.played} · Won ${s.played?Math.round(100*s.wins/s.played):0}% · Streak ${s.streak} · Best ${s.best}`:"No daily games yet."}
+function finish(won){
+  const s=store.get("pk_stats",{played:0,wins:0,streak:0,best:0,last:"",dist:{}});
+  s.played++;
+  if(won){s.wins++;s.streak=s.last===utc(-1)?s.streak+1:1;s.best=Math.max(s.best,s.streak);
+    s.dist[guesses.length]=(s.dist[guesses.length]||0)+1}else s.streak=0;
+  s.last=utc();store.set("pk_stats",s);showStats()}
+function status(){
+  const won=guesses.includes(answer);
+  $("share").hidden=!(over&&mode==="daily");
+  $("reveal").innerHTML=over?`<img src="sprites/${answer.id}.png" width="96" height="96" onerror="this.style.display='none'" alt="">`:"";
+  $("msg").textContent=over?(won?`🎉 It's ${answer.name}! Solved in ${guesses.length}.`:`Out of guesses. It was ${answer.name}.`)
+    :`${mode==="daily"?"Daily":"Practice"}: guess ${guesses.length+1} of ${MAX}`}
+function add(p,restoring){
+  guesses.push(p);
+  if(p===answer||guesses.length>=MAX)over=true;
+  if(mode==="daily"&&!restoring){
+    store.set("pk_day",{d:utc(),ids:guesses.map(g=>g.id)});
+    if(over)finish(p===answer)}
+  redraw();status()}
+function start(a,m){
+  answer=a;mode=m;guesses=[];over=false;
+  if(m==="daily"){const sv=store.get("pk_day",null);
+    if(sv&&sv.d===utc())sv.ids.forEach(id=>{const p=DEX.find(x=>x.id===id);if(p&&!over)add(p,true)})}
+  redraw();status();showStats()}
+function guess(){
+  if(over)return;
+  const p=DEX.find(x=>x.name.toLowerCase()===$("in").value.trim().toLowerCase());
+  if(!p){$("msg").textContent="Pick a name from the list.";return}
+  if(guesses.includes(p)){$("msg").textContent="Already guessed.";return}
+  $("in").value="";add(p)}
+function share(){
+  const won=guesses.includes(answer),E={g:"🟩",y:"🟨","":"⬛"};
+  const txt=`Guess That Pokémon ${utc()} ${won?guesses.length:"X"}/${MAX}\n`+
+    guesses.map(p=>evalG(p).slice(1).map(([c])=>E[c]).join("")).join("\n");
+  if(navigator.share)navigator.share({text:txt}).catch(()=>{});
+  else if(navigator.clipboard)navigator.clipboard.writeText(txt).then(()=>$("msg").textContent="Copied to clipboard!");
+  else prompt("Copy your result:",txt)}
+function init(){
+  $("dl").innerHTML=DEX.map(p=>`<option value="${p.name}">`).join("");
+  $("spr").checked=store.get("pk_spr",false); // sprites hidden by default
+  start(daily(),"daily")}
+$("go").onclick=guess;
+$("in").onkeydown=e=>{if(e.key==="Enter")guess()};
+$("rand").onclick=()=>start(DEX[Math.floor(Math.random()*DEX.length)],"practice");
+$("day").onclick=()=>start(daily(),"daily");
+$("share").onclick=share;
+$("spr").onchange=()=>{store.set("pk_spr",$("spr").checked);redraw()};
+fetch("pokemon.json").then(r=>r.ok?r.json():Promise.reject()).then(d=>{DEX=d}).catch(()=>{}).finally(init);
+</script></body></html>
