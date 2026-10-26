@@ -12,7 +12,7 @@ input{flex:1;padding:10px;font-size:1rem;border-radius:8px;border:1px solid var(
 button{padding:10px 14px;border:0;border-radius:8px;background:var(--g);color:#fff;font-size:1rem}
 button.alt{background:var(--x)}
 .wrap{overflow-x:auto;margin-top:12px}
-.row{display:grid;grid-template-columns:56px repeat(8,64px);gap:4px;margin-bottom:4px;min-width:600px}
+.row{display:grid;grid-template-columns:56px repeat(8,64px);gap:4px;margin-bottom:4px;min-width:605px}
 .c{background:var(--x);color:#fff;border-radius:6px;padding:6px 2px;font-size:.72rem;text-align:center;display:flex;align-items:center;justify-content:center;min-height:48px;word-break:break-word}
 .c.g{background:var(--g)}.c.y{background:var(--y)}
 .hd .c{background:var(--card);color:var(--fg);min-height:28px;font-weight:600}
@@ -24,39 +24,39 @@ button.alt{background:var(--x)}
 <button id="go">Guess</button></div>
 <datalist id="dl"></datalist>
 <div id="msg"></div><div id="reveal"></div><div id="stats"></div>
-<div class="wrap"><div class="row hd"><div class="c"></div><div class="c">Name</div><div class="c">Type 1</div><div class="c">Type 2</div><div class="c">Gen</div><div class="c">Stage</div><div class="c">Height</div><div class="c">Weight</div><div class="c">BST</div></div><div id="board"></div></div>
+<div class="wrap"><div class="row hd"><div class="c"></div><div class="c">Name</div><div class="c">Type 1</div><div class="c">Type 2</div><div class="c">Gen</div><div class="c">Evo</div><div class="c">Split</div><div class="c">Height</div><div class="c">Weight</div></div><div id="board"></div></div>
 <p><button id="share" hidden>Share result</button> <button class="alt" id="rand">Practice round</button> <button class="alt" id="day">Today's puzzle</button></p>
 <label><input type="checkbox" id="spr" style="flex:none"> Show sprites on guesses</label>
 <script>
 // Sample data. Replace by running build_data.py, which writes pokemon.json (full dex).
 let DEX=[
-{id:1,name:"Bulbasaur",t1:"grass",t2:"poison",gen:1,stage:1,h:0.7,w:6.9,bst:318},
-{id:3,name:"Venusaur",t1:"grass",t2:"poison",gen:1,stage:3,h:2.0,w:100,bst:525},
-{id:4,name:"Charmander",t1:"fire",t2:"",gen:1,stage:1,h:0.6,w:8.5,bst:309},
-{id:6,name:"Charizard",t1:"fire",t2:"flying",gen:1,stage:3,h:1.7,w:90.5,bst:534},
-{id:7,name:"Squirtle",t1:"water",t2:"",gen:1,stage:1,h:0.5,w:9.0,bst:314},
-{id:9,name:"Blastoise",t1:"water",t2:"",gen:1,stage:3,h:1.6,w:85.5,bst:530},
-{id:25,name:"Pikachu",t1:"electric",t2:"",gen:1,stage:2,h:0.4,w:6.0,bst:320},
-{id:39,name:"Jigglypuff",t1:"normal",t2:"fairy",gen:1,stage:2,h:0.5,w:5.5,bst:270},
-{id:94,name:"Gengar",t1:"ghost",t2:"poison",gen:1,stage:3,h:1.5,w:40.5,bst:500},
-{id:131,name:"Lapras",t1:"water",t2:"ice",gen:1,stage:1,h:2.5,w:220,bst:535},
-{id:133,name:"Eevee",t1:"normal",t2:"",gen:1,stage:1,h:0.3,w:6.5,bst:325},
-{id:143,name:"Snorlax",t1:"normal",t2:"",gen:1,stage:2,h:2.1,w:460,bst:540},
-{id:149,name:"Dragonite",t1:"dragon",t2:"flying",gen:1,stage:3,h:2.2,w:210,bst:600},
-{id:150,name:"Mewtwo",t1:"psychic",t2:"",gen:1,stage:1,h:2.0,w:122,bst:680},
-{id:151,name:"Mew",t1:"psychic",t2:"",gen:1,stage:1,h:0.4,w:4.0,bst:600},
-{id:152,name:"Chikorita",t1:"grass",t2:"",gen:2,stage:1,h:0.9,w:6.4,bst:318},
-{id:155,name:"Cyndaquil",t1:"fire",t2:"",gen:2,stage:1,h:0.5,w:7.9,bst:309},
-{id:158,name:"Totodile",t1:"water",t2:"",gen:2,stage:1,h:0.6,w:9.5,bst:314},
-{id:248,name:"Tyranitar",t1:"rock",t2:"dark",gen:2,stage:3,h:2.0,w:202,bst:600},
-{id:282,name:"Gardevoir",t1:"psychic",t2:"fairy",gen:3,stage:3,h:1.6,w:48.4,bst:518},
-{id:445,name:"Garchomp",t1:"dragon",t2:"ground",gen:4,stage:3,h:1.9,w:95,bst:600},
-{id:448,name:"Lucario",t1:"fighting",t2:"steel",gen:4,stage:2,h:1.2,w:54,bst:525},
-{id:658,name:"Greninja",t1:"water",t2:"dark",gen:6,stage:3,h:1.5,w:40,bst:530},
-{id:700,name:"Sylveon",t1:"fairy",t2:"",gen:6,stage:2,h:1.0,w:23.5,bst:525},
-{id:778,name:"Mimikyu",t1:"ghost",t2:"fairy",gen:7,stage:1,h:0.2,w:0.7,bst:476},
-{id:884,name:"Duraludon",t1:"steel",t2:"dragon",gen:8,stage:1,h:1.8,w:40,bst:535},
-{id:906,name:"Sprigatito",t1:"grass",t2:"",gen:9,stage:1,h:0.4,w:4.1,bst:310}];
+{id:1,evos:3,split:false,name:"Bulbasaur",t1:"grass",t2:"poison",gen:1,stage:1,h:0.7,w:6.9,bst:318},
+{id:3,evos:3,split:false,name:"Venusaur",t1:"grass",t2:"poison",gen:1,stage:3,h:2.0,w:100,bst:525},
+{id:4,evos:3,split:false,name:"Charmander",t1:"fire",t2:"",gen:1,stage:1,h:0.6,w:8.5,bst:309},
+{id:6,evos:3,split:false,name:"Charizard",t1:"fire",t2:"flying",gen:1,stage:3,h:1.7,w:90.5,bst:534},
+{id:7,evos:3,split:false,name:"Squirtle",t1:"water",t2:"",gen:1,stage:1,h:0.5,w:9.0,bst:314},
+{id:9,evos:3,split:false,name:"Blastoise",t1:"water",t2:"",gen:1,stage:3,h:1.6,w:85.5,bst:530},
+{id:25,evos:3,split:false,name:"Pikachu",t1:"electric",t2:"",gen:1,stage:2,h:0.4,w:6.0,bst:320},
+{id:39,evos:3,split:false,name:"Jigglypuff",t1:"normal",t2:"fairy",gen:1,stage:2,h:0.5,w:5.5,bst:270},
+{id:94,evos:3,split:false,name:"Gengar",t1:"ghost",t2:"poison",gen:1,stage:3,h:1.5,w:40.5,bst:500},
+{id:131,evos:1,split:false,name:"Lapras",t1:"water",t2:"ice",gen:1,stage:1,h:2.5,w:220,bst:535},
+{id:133,evos:2,split:true,name:"Eevee",t1:"normal",t2:"",gen:1,stage:1,h:0.3,w:6.5,bst:325},
+{id:143,evos:2,split:false,name:"Snorlax",t1:"normal",t2:"",gen:1,stage:2,h:2.1,w:460,bst:540},
+{id:149,evos:3,split:false,name:"Dragonite",t1:"dragon",t2:"flying",gen:1,stage:3,h:2.2,w:210,bst:600},
+{id:150,evos:1,split:false,name:"Mewtwo",t1:"psychic",t2:"",gen:1,stage:1,h:2.0,w:122,bst:680},
+{id:151,evos:1,split:false,name:"Mew",t1:"psychic",t2:"",gen:1,stage:1,h:0.4,w:4.0,bst:600},
+{id:152,evos:3,split:false,name:"Chikorita",t1:"grass",t2:"",gen:2,stage:1,h:0.9,w:6.4,bst:318},
+{id:155,evos:3,split:false,name:"Cyndaquil",t1:"fire",t2:"",gen:2,stage:1,h:0.5,w:7.9,bst:309},
+{id:158,evos:3,split:false,name:"Totodile",t1:"water",t2:"",gen:2,stage:1,h:0.6,w:9.5,bst:314},
+{id:248,evos:3,split:false,name:"Tyranitar",t1:"rock",t2:"dark",gen:2,stage:3,h:2.0,w:202,bst:600},
+{id:282,evos:3,split:true,name:"Gardevoir",t1:"psychic",t2:"fairy",gen:3,stage:3,h:1.6,w:48.4,bst:518},
+{id:445,evos:3,split:false,name:"Garchomp",t1:"dragon",t2:"ground",gen:4,stage:3,h:1.9,w:95,bst:600},
+{id:448,evos:2,split:false,name:"Lucario",t1:"fighting",t2:"steel",gen:4,stage:2,h:1.2,w:54,bst:525},
+{id:658,evos:3,split:false,name:"Greninja",t1:"water",t2:"dark",gen:6,stage:3,h:1.5,w:40,bst:530},
+{id:700,evos:2,split:true,name:"Sylveon",t1:"fairy",t2:"",gen:6,stage:2,h:1.0,w:23.5,bst:525},
+{id:778,evos:1,split:false,name:"Mimikyu",t1:"ghost",t2:"fairy",gen:7,stage:1,h:0.2,w:0.7,bst:476},
+{id:884,evos:2,split:false,name:"Duraludon",t1:"steel",t2:"dragon",gen:8,stage:1,h:1.8,w:40,bst:535},
+{id:906,evos:3,split:false,name:"Sprigatito",t1:"grass",t2:"",gen:9,stage:1,h:0.4,w:4.1,bst:310}];
 const MAX=8,$=s=>document.getElementById(s);
 const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},
  set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
@@ -69,7 +69,13 @@ function daily(){ // same Pokémon for everyone, resets at 00:00 UTC
 function evalG(p){
   const ty=(v,k)=>!v?[answer[k]?"":"g","—"]:answer[k]===v?["g",v]:(answer.t1===v||answer.t2===v)?["y",v]:["",v];
   const nm=k=>p[k]===answer[k]?["g",""+p[k]]:["",(answer[k]>p[k]?"↑ ":"↓ ")+p[k]];
-  return [[p===answer?"g":"",p.name],ty(p.t1,"t1"),ty(p.t2,"t2"),nm("gen"),nm("stage"),nm("h"),nm("w"),nm("bst")]}
+  const evo=()=>{const a=answer,t=p.stage+"/"+p.evos;
+    return [p.stage===a.stage&&p.evos===a.evos?"g":(p.stage===a.stage||p.evos===a.evos)?"y":"",t]};
+  const spl=()=>[p.split===answer.split?"g":"",p.split?"Yes":"No"];
+  const TOL=0.25; // yellow if within 25% of the answer
+  const hw=k=>{const g=p[k],t=answer[k];
+    return g===t?["g",""+g]:[Math.abs(g-t)<=t*TOL?"y":"",(t>g?"↑ ":"↓ ")+g]};
+  return [[p===answer?"g":"",p.name],ty(p.t1,"t1"),ty(p.t2,"t2"),nm("gen"),evo(),spl(),hw("h"),hw("w")]}
 function redraw(){
   const spr=$("spr").checked;
   $("board").innerHTML=guesses.slice().reverse().map(p=>{

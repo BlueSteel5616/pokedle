@@ -27,6 +27,12 @@ def depth(node, name, d=1):
             return r
     return 0
 
+def maxdepth(node, d=1):
+    return max([maxdepth(n, d + 1) for n in node["evolves_to"]] or [d])
+
+def has_split(node):
+    return len(node["evolves_to"]) > 1 or any(has_split(n) for n in node["evolves_to"])
+
 def build(i):
     p = get(f"{API}pokemon/{i}")
     s = get(p["species"]["url"])
@@ -39,7 +45,7 @@ def build(i):
         "name": s["name"].replace("-", " ").title(),
         "t1": types[0], "t2": types[1] if len(types) > 1 else "",
         "gen": GEN[s["generation"]["name"].split("-")[1]],
-        "stage": depth(chains[cu], s["name"]),
+        "stage": depth(chains[cu], s["name"]), "evos": maxdepth(chains[cu]), "split": has_split(chains[cu]),
         "h": p["height"] / 10, "w": p["weight"] / 10,
         "bst": sum(st["base_stat"] for st in p["stats"]),
     }
