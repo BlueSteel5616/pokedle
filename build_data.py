@@ -45,7 +45,7 @@ def build(i):
         "name": s["name"].replace("-", " ").title(),
         "t1": types[0], "t2": types[1] if len(types) > 1 else "",
         "gen": GEN[s["generation"]["name"].split("-")[1]],
-        "stage": depth(chains[cu], s["name"]), "evos": maxdepth(chains[cu]), "split": has_split(chains[cu]),
+        "stage": depth(chains[cu], s["name"]), "color": s["color"]["name"], "evos": maxdepth(chains[cu]), "split": has_split(chains[cu]),
         "h": p["height"] / 10, "w": p["weight"] / 10,
         "bst": sum(st["base_stat"] for st in p["stats"]),
     }
