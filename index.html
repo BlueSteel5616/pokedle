@@ -12,7 +12,7 @@ input{flex:1;padding:10px;font-size:1rem;border-radius:8px;border:1px solid var(
 button{padding:10px 14px;border:0;border-radius:8px;background:var(--g);color:#fff;font-size:1rem}
 button.alt{background:var(--x)}
 .wrap{overflow-x:auto;margin-top:12px}
-.row{display:grid;grid-template-columns:36px repeat(9,48px);gap:4px;margin-bottom:4px;min-width:480px}
+.row{display:grid;grid-template-columns:36px repeat(10,48px);gap:4px;margin-bottom:4px;min-width:530px}
 .c{background:var(--x);color:#fff;border-radius:6px;padding:4px 1px;font-size:.62rem;text-align:center;display:flex;align-items:center;justify-content:center;min-height:40px;word-break:break-word}
 .c.g{background:var(--g)}.c.y{background:var(--y)}
 .hd .c{background:var(--card);color:var(--fg);min-height:24px;font-weight:600}
@@ -24,7 +24,7 @@ button.alt{background:var(--x)}
 <button id="go">Guess</button></div>
 <datalist id="dl"></datalist>
 <div id="msg"></div><div id="reveal"></div><div id="stats"></div>
-<div class="wrap"><div class="row hd"><div class="c"></div><div class="c">Name</div><div class="c">Type 1</div><div class="c">Type 2</div><div class="c">Gen</div><div class="c">Evo</div><div class="c">Split</div><div class="c">Height</div><div class="c">Weight</div><div class="c">Color</div></div><div id="board"></div></div>
+<div class="wrap"><div class="row hd"><div class="c"></div><div class="c">Name</div><div class="c">Type 1</div><div class="c">Type 2</div><div class="c">Gen</div><div class="c">Evo</div><div class="c">Split</div><div class="c">Height</div><div class="c">Weight</div><div class="c">Color</div><div class="c">Form</div></div><div id="board"></div></div>
 <p><button id="share" hidden>Share result</button> <button class="alt" id="rand">Practice round</button> <button class="alt" id="day">Today's puzzle</button></p>
 <label><input type="checkbox" id="spr" style="flex:none"> Show sprites on guesses</label>
 <script>
@@ -72,11 +72,12 @@ function evalG(p){
   const evo=()=>{const a=answer,t=p.stage+"/"+p.evos;
     return [p.stage===a.stage&&p.evos===a.evos?"g":(p.stage===a.stage||p.evos===a.evos)?"y":"",t]};
   const spl=()=>[p.split===answer.split?"g":"",p.split?"Yes":"No"];
+  const frm=()=>{const g=p.form||"Base";return [g===(answer.form||"Base")?"g":"",g]};
   const col=()=>[p.color===answer.color?"g":"",p.color];
   const TOL=0.25; // yellow if within 25% of the answer
   const hw=k=>{const g=p[k],t=answer[k];
     return g===t?["g",""+g]:[Math.abs(g-t)<=t*TOL?"y":"",(t>g?"↑ ":"↓ ")+g]};
-  return [[p===answer?"g":"",p.name],ty(p.t1,"t1"),ty(p.t2,"t2"),nm("gen"),evo(),spl(),hw("h"),hw("w"),col()]}
+  return [[p===answer?"g":"",p.name],ty(p.t1,"t1"),ty(p.t2,"t2"),nm("gen"),evo(),spl(),hw("h"),hw("w"),col(),frm()]}
 function redraw(){
   const spr=$("spr").checked;
   $("board").innerHTML=guesses.slice().reverse().map(p=>{
