@@ -62,7 +62,13 @@ const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v)
  set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 const utc=(off=0)=>new Date(Date.now()+off*864e5).toISOString().slice(0,10);
 let answer,guesses,over,mode;
+// Hand-picked days (UTC date -> exact name from the list). Other days stay random.
+const SCHEDULE={
+  "2026-12-24":"Delibird"
+};
 function daily(){ // same Pokémon for everyone, resets at 00:00 UTC
+  const pick=DEX.find(p=>p.name===SCHEDULE[utc()]);
+  if(pick)return pick;
   let d=Math.floor(Date.now()/864e5),s=(d*2654435761)>>>0;s^=s>>>15;s=Math.imul(s,2246822519)>>>0;
   return DEX[s%DEX.length]}
 // Returns [class,text] per column: name, type1, type2, gen, stage, height, weight, bst
